@@ -1,0 +1,1 @@
+![Swagger UI CRUD Test](./documentation/swagger_documentation.png)

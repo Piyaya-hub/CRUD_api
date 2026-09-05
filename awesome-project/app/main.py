@@ -44,23 +44,6 @@ class TaskUpdate(BaseModel):
 # def health():
 #     return {"status": "Successful"}
 
-#Endpoint created for tasks
-@app.get("/tasks")
-def get_tasks_db():
-    return {"database": tasks}
-
-#Endpoint finding specific tasks using unique Ids
-@app.get("/tasks_id/{id}")
-def get_task_id(id: int):
-    for task in tasks:
-        if task["id"] == id:
-            return task
-        
-    raise HTTPException (
-        status_code=404,
-        detail=f"Task Id {id} not existing." #
-    )
-    
 # Endpoint for tasks creation integrated with pydantic validation
 @app.post("/tasks", status_code=status.HTTP_201_CREATED)
 async def create_task(task_input: TaskCreate):
@@ -74,6 +57,37 @@ async def create_task(task_input: TaskCreate):
      
     tasks.append(new_task)
     return new_task
+
+#Endpoint created for get tasks
+@app.get("/list_of_tasks")
+def get_tasks_db():
+    return {"database": tasks}
+
+#Endpoint for displaying list of task with constraints
+@app.get("/tasks")
+def get_tasks_status(done: Optional[bool] = None):    
+    if done is not None:
+        return [task for task in tasks if task["done"] == done]
+    return tasks
+
+#Endpoint for searching tasks using String
+@app.get("/tasks_search/{title}")
+def get_search_tasks(search: Optional[str] = None):
+    if search is not None:
+        return [task for task in tasks if search.lower().strip() in task["title"].lower()]
+    return tasks
+    
+#Endpoint finding specific tasks using unique Ids
+@app.get("/tasks/{id}")
+def get_task_id(id: int):
+    for task in tasks:
+        if task["id"] == id:
+            return task
+        
+    raise HTTPException (
+        status_code=404,
+        detail=f"Task Id {id} not existing." #
+    )
 
 # Endpoint for tasks updates integrated with pydantic validation
 @app.put("/tasks/{id}")
