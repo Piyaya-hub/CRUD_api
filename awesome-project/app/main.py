@@ -6,7 +6,14 @@ app = FastAPI()
 
 # Acting database for tasks lists
 # Data were added using swagger for testing of each functions.
-tasks = []
+
+Prototype_tasks = [ 
+    {"id": 1, "title": "Part 1", "done": False},
+    {"id": 2, "title": "Part 2", "done": False},
+    {"id": 3, "title": "Part 3", "done": False}
+    ]
+
+tasks = list(Prototype_tasks)
 
 # A pydantic model for input validation during task creation, POST endpoint specifically.
 class TaskCreate(BaseModel):
@@ -58,6 +65,18 @@ async def create_task(task_input: TaskCreate):
     tasks.append(new_task)
     return new_task
 
+@app.post("/reset")
+def reset_task():
+    global tasks
+    
+    tasks = [task.copy() for task in Prototype_tasks]
+    
+    return {
+        "message": "Database had been reset for testing.",
+        "tasks": tasks
+        }
+        
+
 #Endpoint created for get tasks
 @app.get("/list_of_tasks")
 def get_tasks_db():
@@ -76,7 +95,7 @@ def get_search_tasks(search: Optional[str] = None):
     if search is not None:
         return [task for task in tasks if search.lower().strip() in task["title"].lower()]
     return tasks
-    
+
 #Endpoint finding specific tasks using unique Ids
 @app.get("/tasks/{id}")
 def get_task_id(id: int):
@@ -89,6 +108,23 @@ def get_task_id(id: int):
         detail=f"Task Id {id} not existing." #
     )
 
+# Endpoint for summary of the entire task program
+@app.get("/tasks_status")
+def get_tasks_status():
+    finished_count = 0
+    
+    Total_task = len(tasks)
+    
+    for task in tasks:
+        if task["done"] == True:
+            finished_count += 1
+    
+    return {
+        "total": Total_task,
+        "Finished": finished_count,
+        "Unfinished": Total_task - finished_count
+        }
+    
 # Endpoint for tasks updates integrated with pydantic validation
 @app.put("/tasks/{id}")
 async def update_task(id: int, task_update: TaskUpdate):
