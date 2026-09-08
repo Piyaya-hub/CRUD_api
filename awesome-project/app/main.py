@@ -90,7 +90,7 @@ def get_tasks_status(done: Optional[bool] = None):
     return tasks
 
 #Endpoint for searching tasks using String
-@app.get("/tasks_search/{title}")
+@app.get("/tasks_search")
 def get_search_tasks(search: Optional[str] = None):
     if search is not None:
         return [task for task in tasks if search.lower().strip() in task["title"].lower()]
